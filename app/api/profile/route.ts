@@ -49,8 +49,8 @@ export async function GET(request: NextRequest) {
       success: true,
       user: {
         userName: dbUser.name,
-        email: dbUser.email,
-        userId: dbUser._id.toString(),
+        // email: dbUser.email,
+        // userId: dbUser._id.toString(),
       },
     });
   } catch (error) {

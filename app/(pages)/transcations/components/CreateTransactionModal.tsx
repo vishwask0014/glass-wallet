@@ -4,6 +4,7 @@ import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
 import Modal from "@/app/Components/common/Modal";
 import Button from "@/app/Components/common/Button";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 const CATEGORIES = [
   "Food",
@@ -12,6 +13,8 @@ const CATEGORIES = [
   "Investment",
   "Salary",
   "Utilities",
+  "Bills",
+  "Gadgets",
   "Entertainment",
   "Other",
 ];
@@ -23,15 +26,12 @@ interface CreateTransactionModalProps {
 export default function CreateTransactionModal({
   onClose,
 }: CreateTransactionModalProps) {
-  const [type, setType] = useState<string>("");
+  const [type, setType] = useState<string>("debit");
   const [amount, setAmount] = useState<number>(0);
   const [category, setCategory] = useState<string>("");
   const [date, setDate] = useState<string>("");
   const [note, setNote] = useState<string>("");
   const [merchant, setMerchant] = useState<string>("");
-
-  console.log(category, '>>>>category');
-  
 
   // DATE FORMAT AND CONVERT TO 12HR TIME ZONE
   const dateFormat = (data: string) => {
@@ -41,6 +41,8 @@ export default function CreateTransactionModal({
     });
     return formattedDate;
   };
+
+  console.log(type, ">>>type");
 
   const handleAddNew = async () => {
     try {
@@ -59,6 +61,19 @@ export default function CreateTransactionModal({
         }),
       });
       const data = await response.json();
+
+      if (response.ok) {
+        toast.success("Transcation Created successfully", {
+          style: {
+            background: "green",
+            color: "white",
+            padding: "10px",
+            borderRadius: "5px",
+          },
+          duration: 5000,
+        });
+        onClose();
+      }
     } catch (error) {
       console.log(error);
     }
@@ -126,9 +141,7 @@ export default function CreateTransactionModal({
           <input
             id="txn-amount"
             type="number"
-            min="0"
-            step="0.01"
-            placeholder="0.00"
+            placeholder="Enter amount"
             required
             value={amount}
             onChange={(e) => setAmount(Number(e.target.value))}
