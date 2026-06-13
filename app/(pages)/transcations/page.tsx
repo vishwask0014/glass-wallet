@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Loader, Plus, Search, X } from "lucide-react";
 import CreateTransactionModal from "./components/CreateTransactionModal";
+import EditTransactionModal from "./components/EditTransactionModal";
 
 type Transaction = {
   userId: string;
@@ -16,9 +17,10 @@ type Transaction = {
 
 export default function Page() {
   const [showModal, setShowModal] = useState(false);
+  const [showEditTransactionModal, setShowEditTransactionModal] =
+    useState(false);
   const [transcation, setTranscation] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-
   const [searchText, setSearchText] = useState("");
   const [debitNcreditFilter, setDebitNcreditFilter] = useState("");
 
@@ -75,6 +77,12 @@ export default function Page() {
     <div className="page-shell py-6 sm:py-10">
       {showModal && (
         <CreateTransactionModal onClose={() => setShowModal(false)} />
+      )}
+
+      {showEditTransactionModal && (
+        <EditTransactionModal
+          onClose={() => setShowEditTransactionModal(false)}
+        />
       )}
 
       <section className="glass-card-strong rounded-4xl p-6 sm:p-8">

@@ -1,21 +1,11 @@
 import { NextResponse } from "next/server";
-import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
-
-const MONGODB_URI = process.env.MONGODB_URI!;
-
-const UserSchema = new mongoose.Schema({
-  name: String,
-  email: String,
-  password: String,
-});
-
-const User =
-  mongoose.models.User || mongoose.model("User", UserSchema);
+import connectDB from "@/app/lib/mongodb";
+import User from "@/app/models/User";
 
 export async function POST(req: Request) {
   try {
-    await mongoose.connect(MONGODB_URI);
+    await connectDB();
     const saltRounds = 10;
 
     const body = await req.json();

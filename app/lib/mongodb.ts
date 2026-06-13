@@ -1,9 +1,14 @@
 import mongoose from "mongoose";
 
-const MONGODB_URI = process.env.MONGODB_URI!;
+const MONGODB_URI = process.env.MONGODB_URI;
+const DB_NAME = "myapp";
 
 if (!MONGODB_URI) {
-  throw new Error("Please add MONGODB_URI in .env.local");
+  throw new Error("Please add MONGODB_URI in .env");
+}
+
+if (!process.env.JWT_SECRET) {
+  throw new Error("Please add JWT_SECRET in .env");
 }
 
 type MongooseCache = {
@@ -32,7 +37,10 @@ async function connectDB() {
   }
 
   if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGODB_URI);
+    cached.promise = mongoose.connect(MONGODB_URI!, {
+      dbName: DB_NAME,
+      serverSelectionTimeoutMS: 15000,
+    });
   }
 
   cached.conn = await cached.promise;
