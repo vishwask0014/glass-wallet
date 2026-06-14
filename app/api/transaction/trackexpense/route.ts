@@ -1,13 +1,8 @@
 import connectDB from "@/app/lib/mongodb";
 import Transcation from "@/app/models/Transaction";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { NextRequest, NextResponse } from "next/server";
-
-interface UserTokenPayloadType extends JwtPayload {
-    userName: string;
-    email: string;
-    userId: string;
-}
+import type { UserTokenPayload } from "@/app/types/common";
 
 export async function GET(request: NextRequest) {
     try {
@@ -21,13 +16,13 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        let userPayload: UserTokenPayloadType;
+        let userPayload: UserTokenPayload;
 
         try {
             userPayload = jwt.verify(
                 token,
                 process.env.JWT_SECRET!
-            ) as UserTokenPayloadType;
+            ) as UserTokenPayload;
 
             console.log(userPayload);
 

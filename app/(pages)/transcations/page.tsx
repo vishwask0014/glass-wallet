@@ -4,42 +4,34 @@ import { useEffect, useMemo, useState } from "react";
 import { Info, Loader, Plus, Search, X } from "lucide-react";
 import CreateTransactionModal from "./components/CreateTransactionModal";
 import EditTransactionModal from "./components/EditTransactionModal";
-
-type Transaction = {
-  userId: string;
-  type: string;
-  amount: number;
-  category: string;
-  createAt: string;
-  note?: string;
-  merchant: string;
-};
+import type { TransactionRecord } from "@/app/types/common";
 
 export default function Page() {
   const [showModal, setShowModal] = useState(false);
   const [showEditTransactionModal, setShowEditTransactionModal] =
     useState(false);
-  const [transcation, setTranscation] = useState<Transaction[]>([]);
+  const [transcation, setTranscation] = useState<TransactionRecord[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [debitNcreditFilter, setDebitNcreditFilter] = useState("");
+  const [editTransaction, setEditTransaction] = useState<TransactionRecord | null>(
+    null,
+  );
+
+  async function getTransactions() {
+    try {
+      setIsLoading(true);
+      const res = await fetch("/api/transaction/trackexpense");
+      const data = await res.json();
+      setTranscation(data.transcation || []);
+    } catch (error) {
+      console.error("not able to fetch transcation details", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function getTransactions() {
-      try {
-        setIsLoading(true);
-
-        const res = await fetch("/api/transaction/trackexpense");
-        const data = await res.json();
-
-        setTranscation(data.transcation || []);
-      } catch (error) {
-        console.error("not able to fetch transcation details", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
     getTransactions();
   }, []);
 
@@ -73,15 +65,29 @@ export default function Page() {
     );
   }
 
+  // check is 24 hr pasted from the transcation createAt date
+  function is24hrPassed(createAt: string) {
+    const currentData = new Date().getTime();
+    const txnDate = new Date(createAt).getTime();
+    const twentyFourHours = 24 * 60 * 60 * 1000;
+    return currentData - txnDate > twentyFourHours;
+  }
+
   return (
     <div className="page-shell py-6 sm:py-10">
       {showModal && (
         <CreateTransactionModal onClose={() => setShowModal(false)} />
       )}
 
-      {showEditTransactionModal && (
+      {showEditTransactionModal && editTransaction && (
         <EditTransactionModal
-          onClose={() => setShowEditTransactionModal(false)}
+          key={editTransaction._id}
+          transaction={editTransaction}
+          onClose={() => {
+            setShowEditTransactionModal(false);
+            setEditTransaction(null);
+          }}
+          onSaved={getTransactions}
         />
       )}
 
@@ -210,30 +216,35 @@ export default function Page() {
                       ₹{row.amount}
                     </p>
 
-                    <button
-                      type="button"
-                      onClick={() => setShowEditTransactionModal(true)}
-                      className="theme-button-secondary flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold backdrop-blur-xl w-fit justify-center cursor-pointer"
-                    >
-                      Edit
-                      <span
-                        className="group/info relative inline-flex"
-                        onClick={(e) => e.stopPropagation()}
-                        onKeyDown={(e) => e.stopPropagation()}
+                    {is24hrPassed(row.createAt) && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditTransaction(row);
+                          setShowEditTransactionModal(true);
+                        }}
+                        className="theme-button-secondary flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold backdrop-blur-xl w-fit justify-center cursor-pointer"
                       >
-                        <Info
-                          size={15}
-                          className="theme-text-soft cursor-help"
-                          aria-label="Edit button will disappear after 24 hours."
-                        />
+                        Edit
                         <span
-                          role="tooltip"
-                          className="theme-chip !bg-white !text-black pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 w-max max-w-48 -translate-x-1/2 rounded-xl px-3 py-2 text-center text-xs font-normal opacity-0 shadow-lg transition-opacity group-hover/info:opacity-100 group-focus-within/info:opacity-100"
+                          className="group/info relative inline-flex"
+                          onClick={(e) => e.stopPropagation()}
+                          onKeyDown={(e) => e.stopPropagation()}
                         >
-                          Edit button will disappear after 24 hours.
+                          <Info
+                            size={15}
+                            className="theme-text-soft cursor-help"
+                            aria-label="Edit button will disappear after 24 hours."
+                          />
+                          <span
+                            role="tooltip"
+                            className="theme-chip !bg-white !text-black pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 w-max max-w-48 -translate-x-1/2 rounded-xl px-3 py-2 text-center text-xs font-normal opacity-0 shadow-lg transition-opacity group-hover/info:opacity-100 group-focus-within/info:opacity-100"
+                          >
+                            Edit button will disappear after 24 hours.
+                          </span>
                         </span>
-                      </span>
-                    </button>
+                      </button>
+                    )}
                   </div>
                 </div>
               </article>

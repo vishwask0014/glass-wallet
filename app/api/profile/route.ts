@@ -1,14 +1,9 @@
 // /app/api/profile/route.ts
 import connectDB from "@/app/lib/mongodb";
 import User from "@/app/models/User";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { NextRequest, NextResponse } from "next/server";
-
-interface TokenPayload extends JwtPayload {
-  email: string;
-  userId: string;
-  userName: string;
-}
+import type { UserTokenPayload } from "@/app/types/common";
 
 export async function GET(request: NextRequest) {
   const token = request.cookies.get("token")?.value;
@@ -25,10 +20,7 @@ export async function GET(request: NextRequest) {
   try {
     await connectDB();
 
-    const verifiedToken = jwt.verify(
-      token,
-      process.env.JWT_SECRET!,
-    ) as TokenPayload;
+    const verifiedToken = jwt.verify(token, process.env.JWT_SECRET!) as UserTokenPayload;
 
     // Fetch fresh user data from DB so we always get the correct `name`
     // regardless of what was baked into the token.

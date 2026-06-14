@@ -5,6 +5,7 @@ import Modal from "@/app/Components/common/Modal";
 import Button from "@/app/Components/common/Button";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import DateFormat from "@/app/Components/common/DateFormat";
 
 const CATEGORIES = [
   "Food",
@@ -34,13 +35,6 @@ export default function CreateTransactionModal({
   const [merchant, setMerchant] = useState<string>("");
 
   // DATE FORMAT AND CONVERT TO 12HR TIME ZONE
-  const dateFormat = (data: string) => {
-    const date = new Date(data);
-    const formattedDate = date.toLocaleString("en-US", {
-      timeZone: "Asia/Kolkata",
-    });
-    return formattedDate;
-  };
 
   console.log(type, ">>>type");
 
@@ -55,7 +49,7 @@ export default function CreateTransactionModal({
           type: type,
           amount: amount,
           category: category,
-          createAt: dateFormat(date),
+          createAt: DateFormat(date),
           note: note,
           merchant: merchant,
         }),

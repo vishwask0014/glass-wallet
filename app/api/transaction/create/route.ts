@@ -1,24 +1,8 @@
 import connectDB from "@/app/lib/mongodb";
 import { NextRequest, NextResponse } from "next/server";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import Transcation from "@/app/models/Transaction";
-
-interface UserTokenPayloadType extends JwtPayload {
-  name: string;
-  email: string;
-  userId: string;
-}
-
-interface TransactionPayload {
-  name: string; // owner name
-  userId: string; // owner userId or uId
-  type: string; // debt or credit
-  amount: number; // money spend
-  category: string; // food, travel, shopping, investment and salary
-  createAt: string; // txn time and date
-  note: string; // optinal description for spending amount
-  merchant: string;
-}
+import type { TransactionPayload, UserTokenPayload } from "@/app/types/common";
 
 export async function POST(request: NextRequest) {
   try {
@@ -38,14 +22,14 @@ export async function POST(request: NextRequest) {
     }
 
     // STEP 2: VERIFY TOKEN
-    let userPayload: UserTokenPayloadType;
+    let userPayload: UserTokenPayload;
 
     try {
       userPayload = jwt.verify(
         token,
         process.env.JWT_SECRET!,
-      ) as UserTokenPayloadType;
-    } catch (error) {
+      ) as UserTokenPayload;
+    } catch {
       return NextResponse.json(
         { success: false, message: "Unauthorized: Invalid or expired token" },
         { status: 401 },
@@ -53,7 +37,7 @@ export async function POST(request: NextRequest) {
     }
 
     // PAYLOAD DATA OF USER
-    const { name, email, userId } = userPayload;
+    const { userId } = userPayload;
     console.log(userId, ">>>>userid");
 
     // EXTRACT BODY DATA
@@ -63,8 +47,7 @@ export async function POST(request: NextRequest) {
     console.log(body, ">>>>body in route");
 
     //  NEW TRANSCATION CRAETED
-    const newTransaction = await Transcation.create({
-      name,
+    await Transcation.create({
       userId,
       amount,
       type,
