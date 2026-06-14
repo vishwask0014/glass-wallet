@@ -95,9 +95,9 @@ export default function CreateTransactionModal({
                 type="radio"
                 name="type"
                 value="debit"
+                checked={type === "debit"}
                 onChange={(e) => setType(e.target.value)}
                 className="sr-only"
-                defaultChecked
               />
               <span
                 className={`theme-button-secondary flex items-center justify-center gap-2 rounded-[1.15rem] px-4 py-3 text-sm font-semibold has-[:checked]:theme-button-primary ${type === "debit" ? "!border-white text-black" : ""}`}
@@ -111,6 +111,7 @@ export default function CreateTransactionModal({
                 type="radio"
                 name="type"
                 value="credit"
+                checked={type === "credit"}
                 className="sr-only"
                 onChange={(e) => setType(e.target.value)}
               />

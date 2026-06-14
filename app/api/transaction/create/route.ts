@@ -43,14 +43,13 @@ export async function POST(request: NextRequest) {
     // EXTRACT BODY DATA
     const body: TransactionPayload = await request.json();
     const { amount, category, createAt, note, type, merchant } = body;
+    const normalizedType =
+      type?.trim().toLowerCase() === "credit" ? "credit" : "debit";
 
-    console.log(body, ">>>>body in route");
-
-    //  NEW TRANSCATION CRAETED
     await Transcation.create({
       userId,
       amount,
-      type,
+      type: normalizedType,
       category,
       createAt,
       merchant,

@@ -1,15 +1,14 @@
 "use client";
 
-import DashboardHero from './components/DashboardHero';
-import StatsGrid from './components/StatsGrid';
-import RecentActivity from './components/RecentActivity';
-import SpendBreakdown from './components/SpendBreakdown';
-import AISuggestion from './components/AIsuggestion';
-import { useUserStore } from '@/app/store/useUserStore';
-import { useEffect } from 'react';
+import DashboardHero from "./components/DashboardHero";
+import StatsGrid from "./components/StatsGrid";
+import RecentActivity from "./components/RecentActivity";
+import SpendBreakdown from "./components/SpendBreakdown";
+import AISuggestion from "./components/AIsuggestion";
+import { useUserStore } from "@/app/store/useUserStore";
+import { useEffect } from "react";
 
 export default function Page() {
-
   return (
     <div className="page-shell py-6 sm:py-10">
       {/* Hero + Stats */}
@@ -26,7 +25,6 @@ export default function Page() {
           <AISuggestion />
         </div>
       </section>
-
     </div>
   );
 }
