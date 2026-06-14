@@ -1,90 +1,90 @@
-"use client";
+import Link from "next/link";
+import type { DashboardTotals, SalaryAnalytics } from "../utils";
+import { formatCurrency, formatSignedCurrency, getCurrentMonthLabel } from "../utils";
 
-import { useEffect, useState } from "react";
-
-type SpendingTotals = {
-  totalDebit: number;
-  totalCredit: number;
+type DashboardHeroProps = {
+  userName: string;
+  totals: DashboardTotals;
+  salary: SalaryAnalytics;
+  isLoading: boolean;
+  error: string | null;
 };
 
-const defaultTotals: SpendingTotals = {
-  totalDebit: 0,
-  totalCredit: 0,
-};
-
-export default function DashboardHero() {
-  const [totals, setTotals] = useState<SpendingTotals>(defaultTotals);
-  const [isLoading, setIsLoading] = useState(true);
-  const [fetchError, setFetchError] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function fetchTotals() {
-      try {
-        setFetchError(null);
-
-        const res = await fetch("/api/transaction/totals", {
-          method: "GET",
-          credentials: "include",
-          cache: "no-store",
-        });
-
-        const contentType = res.headers.get("content-type") ?? "";
-        if (!contentType.includes("application/json")) {
-          throw new Error("Invalid response from server");
-        }
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data.message || "Failed to fetch totals");
-        }
-
-        setTotals({
-          totalDebit: Number(data.totalDebit) || 0,
-          totalCredit: Number(data.totalCredit) || 0,
-        });
-      } catch (error) {
-        console.error("NOT ABLE TO FETCH TOTAL SPENDING AMOUNT", error);
-        setFetchError("Unable to load totals");
-        setTotals(defaultTotals);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchTotals();
-  }, []);
+export default function DashboardHero({
+  userName,
+  totals,
+  salary,
+  isLoading,
+  error,
+}: DashboardHeroProps) {
+  const monthLabel = getCurrentMonthLabel();
 
   return (
     <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
       <div>
         <span className="section-kicker">Dashboard</span>
         <h1 className="theme-text mt-4 text-4xl font-semibold tracking-[-0.06em] sm:text-5xl">
-          Your AI command center for habits, plans, and better money decisions.
+          {userName
+            ? `Welcome back, ${userName}.`
+            : "Your money overview at a glance."}
         </h1>
         <p className="theme-text-muted mt-4 max-w-2xl text-base leading-8">
-          This dashboard studies your behavior, compares it with your weekly and
-          monthly plans, and turns the gap into practical next actions.
+          {salary.hasSalary
+            ? `Comparing ${monthLabel} spending against your monthly in-hand salary of ${formatCurrency(salary.monthlySalary!)}.`
+            : "Add your monthly salary on the profile page to unlock budget-based analytics."}
         </p>
+        {!salary.hasSalary && !isLoading && (
+          <Link
+            href="/profile"
+            className="theme-button-secondary mt-4 inline-flex rounded-full px-4 py-2 text-sm font-semibold"
+          >
+            Set monthly salary
+          </Link>
+        )}
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        {salary.hasSalary && (
+          <div className="glass-card rounded-[1.5rem] px-5 py-4">
+            <p className="theme-text-soft text-sm font-medium">Monthly salary</p>
+            <p className="metric-value theme-text mt-2 text-2xl font-semibold tracking-[-0.05em]">
+              {isLoading ? "..." : formatCurrency(salary.monthlySalary!)}
+            </p>
+          </div>
+        )}
+
         <div className="glass-card rounded-[1.5rem] px-5 py-4">
-          <p className="theme-text-soft text-sm font-medium">Total Debit</p>
+          <p className="theme-text-soft text-sm font-medium">
+            Spent this month
+          </p>
           <p className="metric-value mt-2 text-2xl font-semibold tracking-[-0.05em] text-red-500">
-            {isLoading ? "..." : `₹${totals.totalDebit}`}
+            {isLoading ? "..." : formatCurrency(totals.monthlyDebit)}
           </p>
         </div>
 
         <div className="glass-card rounded-[1.5rem] px-5 py-4">
-          <p className="theme-text-soft text-sm font-medium">Total Credit</p>
-          <p className="metric-value mt-2 text-2xl font-semibold tracking-[-0.05em] text-green-500">
-            {isLoading ? "..." : `₹${totals.totalCredit}`}
+          <p className="theme-text-soft text-sm font-medium">
+            {salary.hasSalary ? "Remaining budget" : "Income this month"}
+          </p>
+          <p
+            className={`metric-value mt-2 text-2xl font-semibold tracking-[-0.05em] ${
+              salary.hasSalary
+                ? salary.isOverBudget
+                  ? "text-red-500"
+                  : "text-green-500"
+                : "text-green-500"
+            }`}
+          >
+            {isLoading
+              ? "..."
+              : salary.hasSalary
+                ? formatSignedCurrency(salary.remainingBudget ?? 0)
+                : formatCurrency(totals.monthlyCredit)}
           </p>
         </div>
 
-        {fetchError && (
-          <p className="theme-text-muted col-span-2 text-sm">{fetchError}</p>
+        {error && (
+          <p className="theme-text-muted col-span-full text-sm">{error}</p>
         )}
       </div>
     </div>

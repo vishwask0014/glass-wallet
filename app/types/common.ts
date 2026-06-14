@@ -21,3 +21,16 @@ export interface TransactionRecord extends TransactionPayload {
   userId: string;
   _id: string;
 }
+
+export interface UserProfile {
+  userName: string;
+  email: string;
+  userId: string;
+  region: string;
+  planningStyle: string;
+  monthlySalary: number | null;
+  salaryUpdatedAt: string | null;
+  canEditSalary: boolean;
+  salaryUnlockDate: string | null;
+  profileImage: string;
+}

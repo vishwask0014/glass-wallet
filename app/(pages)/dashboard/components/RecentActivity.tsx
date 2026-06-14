@@ -1,48 +1,84 @@
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight } from "lucide-react";
+import Link from "next/link";
+import type { TransactionRecord } from "@/app/types/common";
+import { formatCurrency } from "../utils";
 
-const activity = [
-    { merchant: 'Apple One', category: 'Recurring habit', amount: '-$24.99', tone: '#dc2626' },
-    { merchant: 'Payroll Deposit', category: 'Income signal', amount: '+$6,800', tone: '#059669' },
-    { merchant: 'MUJI Workspace', category: 'Lifestyle pattern', amount: '-$148.20', tone: '#334155' },
-    { merchant: 'Tokyo Savings Jar', category: 'Planned transfer', amount: '+$400', tone: '#0369a1' },
-];
+type RecentActivityProps = {
+  transactions: TransactionRecord[];
+  isLoading: boolean;
+  error: string | null;
+};
 
-export default function RecentActivity() {
-    return (
-        <article className="glass-card rounded-[1.9rem] p-6">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <p className="theme-text-soft text-sm font-medium">Recent activity</p>
-                    <h2 className="theme-text mt-1 text-2xl font-semibold tracking-[-0.05em]">
-                        Habit signals from recent spending
-                    </h2>
+function normalizeType(type: unknown) {
+  const value = String(type ?? "")
+    .trim()
+    .toLowerCase();
+  return value === "credit" ? "credit" : "debit";
+}
+
+export default function RecentActivity({
+  transactions,
+  isLoading,
+  error,
+}: RecentActivityProps) {
+  return (
+    <article className="glass-card rounded-[1.9rem] p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="theme-text-soft text-sm font-medium">Recent activity</p>
+          <h2 className="theme-text mt-1 text-2xl font-semibold tracking-[-0.05em]">
+            Latest transactions
+          </h2>
+        </div>
+        <Link
+          href="/transcations"
+          className="icon-chip theme-text transition-opacity hover:opacity-80"
+          aria-label="View all transactions"
+        >
+          <ArrowUpRight size={18} />
+        </Link>
+      </div>
+
+      <div className="mt-6 space-y-3">
+        {isLoading ? (
+          <p className="theme-text-muted text-sm">Loading activity...</p>
+        ) : error ? (
+          <p className="theme-text-muted text-sm">{error}</p>
+        ) : transactions.length === 0 ? (
+          <p className="theme-text-muted text-sm">
+            No transactions yet. Add one from the transactions page.
+          </p>
+        ) : (
+          transactions.map((entry) => {
+            const isCredit = normalizeType(entry.type) === "credit";
+
+            return (
+              <div
+                key={entry._id}
+                className="glass-card rounded-[1.35rem] px-4 py-4"
+              >
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+                  <div>
+                    <p className="theme-text font-semibold">{entry.merchant}</p>
+                    <p className="theme-text-soft mt-1 text-sm">
+                      {entry.category}
+                      {entry.createAt ? ` • ${entry.createAt}` : ""}
+                    </p>
+                  </div>
+                  <p
+                    className={`text-lg font-semibold tracking-[-0.04em] ${
+                      isCredit ? "text-green-500" : "text-red-500"
+                    }`}
+                  >
+                    {isCredit ? "+" : "-"}
+                    {formatCurrency(Number(entry.amount) || 0)}
+                  </p>
                 </div>
-                <div className="icon-chip theme-text">
-                    <ArrowUpRight size={18} />
-                </div>
-            </div>
-
-            <div className="mt-6 space-y-3">
-                {activity.map((entry) => (
-                    <div
-                        key={`${entry.merchant}-${entry.amount}`}
-                        className="glass-card rounded-[1.35rem] px-4 py-4"
-                    >
-                        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-                            <div>
-                                <p className="theme-text font-semibold">{entry.merchant}</p>
-                                <p className="theme-text-soft mt-1 text-sm">{entry.category}</p>
-                            </div>
-                            <p
-                                className="text-lg font-semibold tracking-[-0.04em]"
-                                style={{ color: entry.tone }}
-                            >
-                                {entry.amount}
-                            </p>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </article>
-    );
+              </div>
+            );
+          })
+        )}
+      </div>
+    </article>
+  );
 }
