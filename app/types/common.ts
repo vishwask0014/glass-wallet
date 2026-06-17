@@ -34,3 +34,10 @@ export interface UserProfile {
   salaryUnlockDate: string | null;
   profileImage: string;
 }
+
+export type ChatMessage = {
+  id: string;
+  question: string;
+  answer: string;
+  time: string;
+};

@@ -74,7 +74,7 @@ const DropdownMenu = () => {
                     Profile
                 </Link>
                 <Link
-                    href="/auth"
+                    href="/ai-planner"
                     className="flex items-center gap-2 px-4 py-2.5 theme-text-muted hover:bg-[color:var(--surface-soft)] hover:theme-text-default"
                 >
                     <BrainCog size={18} />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import DashboardHero from "./components/DashboardHero";
 import StatsGrid from "./components/StatsGrid";
@@ -14,69 +14,99 @@ import {
   parseMonthlySalary,
 } from "./utils";
 
+async function fetchDashboardPayload() {
+  const dashboardRes = await fetch("/api/dashboard", {
+    credentials: "include",
+    cache: "no-store",
+  });
+
+  const dashboardType = dashboardRes.headers.get("content-type") ?? "";
+
+  if (dashboardType.includes("application/json")) {
+    const dashboardData = await dashboardRes.json();
+
+    if (dashboardRes.ok && dashboardData.success) {
+      return {
+        user: dashboardData.user as UserProfile,
+        transcation: (dashboardData.transcation ?? []) as TransactionRecord[],
+      };
+    }
+  }
+
+  const [profileRes, transactionsRes] = await Promise.all([
+    fetch("/api/profile", { credentials: "include", cache: "no-store" }),
+    fetch("/api/transaction/trackexpense", {
+      credentials: "include",
+      cache: "no-store",
+    }),
+  ]);
+
+  const profileType = profileRes.headers.get("content-type") ?? "";
+  const transactionsType = transactionsRes.headers.get("content-type") ?? "";
+
+  if (
+    !profileType.includes("application/json") ||
+    !transactionsType.includes("application/json")
+  ) {
+    throw new Error("Invalid response from server");
+  }
+
+  const profileData = await profileRes.json();
+  const transactionsData = await transactionsRes.json();
+
+  if (!profileRes.ok || !profileData.user) {
+    throw new Error(profileData.message || "Failed to load profile");
+  }
+
+  if (!transactionsRes.ok) {
+    throw new Error(transactionsData.message || "Failed to load transactions");
+  }
+
+  return {
+    user: profileData.user as UserProfile,
+    transcation: (transactionsData.transcation ?? []) as TransactionRecord[],
+  };
+}
+
 export default function Page() {
   const pathname = usePathname();
+  const hasLoadedOnce = useRef(false);
   const [userName, setUserName] = useState("");
   const [transactions, setTransactions] = useState<TransactionRecord[]>([]);
   const [monthlySalary, setMonthlySalary] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
-  const loadDashboardData = useCallback(async () => {
+  const loadDashboardData = useCallback(async (silent = false) => {
     try {
       setFetchError(null);
-      setIsLoading(true);
 
-      const res = await fetch("/api/dashboard", {
-        credentials: "include",
-        cache: "no-store",
-      });
-
-      const contentType = res.headers.get("content-type") ?? "";
-      if (!contentType.includes("application/json")) {
-        throw new Error("Invalid response from server");
+      if (!silent) {
+        setIsLoading(true);
       }
 
-      const data = await res.json();
+      const data = await fetchDashboardPayload();
 
-      if (!res.ok || !data.success) {
-        throw new Error(data.message || "Failed to load dashboard data");
-      }
-
-      const profile = data.user as UserProfile;
-
-      setUserName(profile.userName ?? "");
-      setTransactions(data.transcation ?? []);
-      setMonthlySalary(parseMonthlySalary(profile.monthlySalary));
+      setUserName(data.user.userName ?? "");
+      setTransactions(data.transcation);
+      setMonthlySalary(parseMonthlySalary(data.user.monthlySalary));
+      hasLoadedOnce.current = true;
     } catch (error) {
       console.error("Failed to load dashboard data", error);
-      setFetchError("Unable to load dashboard data");
-      setTransactions([]);
-      setMonthlySalary(null);
+      setFetchError("Unable to load dashboard data. Check your connection and try again.");
+
+      if (!hasLoadedOnce.current) {
+        setTransactions([]);
+        setMonthlySalary(null);
+      }
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    void loadDashboardData();
+    void loadDashboardData(false);
   }, [loadDashboardData, pathname]);
-
-  useEffect(() => {
-    const refreshOnFocus = () => {
-      if (document.visibilityState === "visible") {
-        void loadDashboardData();
-      }
-    };
-
-    window.addEventListener("focus", refreshOnFocus);
-    document.addEventListener("visibilitychange", refreshOnFocus);
-
-    return () => {
-      window.removeEventListener("focus", refreshOnFocus);
-      document.removeEventListener("visibilitychange", refreshOnFocus);
-    };
-  }, [loadDashboardData]);
 
   const dashboardData = useMemo(
     () => computeDashboard(transactions, monthlySalary),
@@ -106,6 +136,7 @@ export default function Page() {
           salary={dashboardData.salary}
           isLoading={isLoading}
           error={fetchError}
+          onRefresh={() => loadDashboardData(true)}
         />
         <StatsGrid stats={dashboardData.stats} isLoading={isLoading} />
       </section>

@@ -1,4 +1,5 @@
-import { CircleDollarSign, Percent, Tag } from "lucide-react";
+import Link from "next/link";
+import { CircleDollarSign, Percent, Tag, Wallet } from "lucide-react";
 import type { DashboardStats } from "../utils";
 import { formatCurrency, formatSignedCurrency, getCurrentMonthLabel } from "../utils";
 
@@ -23,65 +24,59 @@ export default function StatsGrid({ stats, isLoading }: StatsGridProps) {
         ? "text-amber-500"
         : "text-green-500";
 
-  const items = stats.hasSalary
-    ? [
-        {
-          label: "Remaining budget",
-          value: isLoading
-            ? "..."
-            : formatSignedCurrency(stats.remainingBudget ?? 0),
-          detail: stats.isOverBudget
-            ? `Spending exceeded salary for ${monthLabel}.`
-            : `Salary left after ${monthLabel} debits.`,
-          icon: CircleDollarSign,
-          valueClass: remainingTone,
-        },
-        {
-          label: "Salary used",
-          value: isLoading ? "..." : `${stats.spentPercent ?? 0}%`,
-          detail: `Share of ${formatCurrency(stats.monthlySalary ?? 0)} spent this month.`,
-          icon: Percent,
-          valueClass: spentTone,
-        },
-        {
-          label: "Top spend category",
-          value: isLoading ? "..." : stats.topCategory,
-          detail: `Highest debit category in ${monthLabel}.`,
-          icon: Tag,
-          valueClass: "theme-text",
-        },
-      ]
-    : [
-        {
-          label: "Monthly salary",
-          value: isLoading
-            ? "..."
-            : stats.monthlySalary
-              ? formatCurrency(stats.monthlySalary)
-              : "Not set",
-          detail: "Add salary on profile to calculate budget analytics.",
-          icon: CircleDollarSign,
-          valueClass: "theme-text",
-        },
-        {
-          label: "Spent this month",
-          value: isLoading ? "..." : formatCurrency(stats.monthlyDebit),
-          detail: "Set salary on profile to compare against your budget.",
-          icon: Percent,
-          valueClass: "text-red-500",
-        },
-        {
-          label: "Top spend category",
-          value: isLoading ? "..." : stats.topCategory,
-          detail: `Highest debit category in ${monthLabel}.`,
-          icon: Tag,
-          valueClass: "theme-text",
-        },
-      ];
+  const items = [
+    {
+      label: "Monthly salary",
+      value: isLoading
+        ? "..."
+        : stats.hasSalary
+          ? formatCurrency(stats.monthlySalary ?? 0)
+          : "Not set",
+      detail: stats.hasSalary
+        ? "In-hand salary saved on your profile."
+        : "Add salary on profile to unlock budget tracking.",
+      icon: Wallet,
+      valueClass: "theme-text",
+      href: stats.hasSalary ? undefined : "/profile",
+    },
+    {
+      label: "Remaining budget",
+      value: isLoading
+        ? "..."
+        : stats.hasSalary
+          ? formatSignedCurrency(stats.remainingBudget ?? 0)
+          : "—",
+      detail: stats.isOverBudget
+        ? `Spending exceeded salary for ${monthLabel}.`
+        : `Salary left after ${monthLabel} debits.`,
+      icon: CircleDollarSign,
+      valueClass: stats.hasSalary ? remainingTone : "theme-text-soft",
+    },
+    {
+      label: "Salary used",
+      value: isLoading
+        ? "..."
+        : stats.hasSalary
+          ? `${stats.spentPercent ?? 0}%`
+          : "—",
+      detail: stats.hasSalary
+        ? `${formatCurrency(stats.monthlyDebit)} spent of ${formatCurrency(stats.monthlySalary ?? 0)}.`
+        : "Set salary to compare spending against your budget.",
+      icon: Percent,
+      valueClass: stats.hasSalary ? spentTone : "theme-text-soft",
+    },
+    {
+      label: "Top spend category",
+      value: isLoading ? "..." : stats.topCategory,
+      detail: `Highest debit category in ${monthLabel}.`,
+      icon: Tag,
+      valueClass: "theme-text",
+    },
+  ];
 
   return (
-    <div className="mt-8 glass-grid md:grid-cols-3">
-      {items.map(({ label, value, detail, icon: Icon, valueClass }) => (
+    <div className="mt-8 glass-grid md:grid-cols-2 xl:grid-cols-4">
+      {items.map(({ label, value, detail, icon: Icon, valueClass, href }) => (
         <article key={label} className="glass-card rounded-[1.7rem] p-5">
           <div className="flex items-start justify-between gap-3">
             <div className="icon-chip theme-text">
@@ -98,6 +93,14 @@ export default function StatsGrid({ stats, isLoading }: StatsGridProps) {
             {value}
           </p>
           <p className="theme-text-muted mt-2 text-sm">{detail}</p>
+          {href && !isLoading && (
+            <Link
+              href={href}
+              className="theme-text mt-3 inline-block text-sm font-semibold underline-offset-4 hover:underline"
+            >
+              Go to profile
+            </Link>
+          )}
         </article>
       ))}
     </div>

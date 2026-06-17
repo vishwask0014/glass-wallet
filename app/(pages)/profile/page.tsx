@@ -6,6 +6,7 @@ import { Camera, IndianRupee, Lock, UserRound } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
+import ProfileSkeleton from "./components/ProfileSkeleton";
 
 const PLANNING_STYLES = [
   "Weekly guided",
@@ -150,11 +151,7 @@ export default function Page() {
   }
 
   if (isLoading) {
-    return (
-      <div className="page-shell py-6 sm:py-10">
-        <p className="theme-text-muted">Loading profile...</p>
-      </div>
-    );
+    return <ProfileSkeleton />;
   }
 
   return (
@@ -184,7 +181,7 @@ export default function Page() {
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading}
-                className="theme-button-secondary absolute -bottom-2 -right-2 flex h-9 w-9 items-center justify-center rounded-full"
+                className=" theme-button-secondary absolute -bottom-2 -right-2 flex h-9 w-9 items-center justify-center rounded-full"
                 aria-label="Upload profile photo"
               >
                 <Camera size={16} />
@@ -276,7 +273,8 @@ export default function Page() {
               />
               {!profile?.canEditSalary && profile?.salaryUnlockDate && (
                 <p className="theme-text-muted mt-2 text-sm">
-                  Salary locked until {formatUnlockDate(profile.salaryUnlockDate)}
+                  Salary locked until{" "}
+                  {formatUnlockDate(profile.salaryUnlockDate)}
                 </p>
               )}
             </div>

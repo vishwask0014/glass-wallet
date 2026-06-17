@@ -37,10 +37,17 @@ async function connectDB() {
   }
 
   if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGODB_URI!, {
-      dbName: DB_NAME,
-      serverSelectionTimeoutMS: 15000,
-    });
+    cached.promise = mongoose
+      .connect(MONGODB_URI!, {
+        dbName: DB_NAME,
+        serverSelectionTimeoutMS: 10000,
+        connectTimeoutMS: 10000,
+      })
+      .catch((error) => {
+        cached.promise = null;
+        cached.conn = null;
+        throw error;
+      });
   }
 
   cached.conn = await cached.promise;

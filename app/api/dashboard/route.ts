@@ -8,8 +8,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   try {
-    await connectDB();
-
     const token = request.cookies.get("token")?.value;
     if (!token) {
       return NextResponse.json(
@@ -32,17 +30,19 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const dbUser = await User.findById(userPayload.userId);
+    await connectDB();
+
+    const [dbUser, transactions] = await Promise.all([
+      User.findById(userPayload.userId),
+      Transcation.find({ userId: userPayload.userId }).sort({ _id: -1 }).lean(),
+    ]);
+
     if (!dbUser) {
       return NextResponse.json(
         { success: false, message: "User not found" },
         { status: 404 },
       );
     }
-
-    const transactions = await Transcation.find({ userId: userPayload.userId })
-      .sort({ _id: -1 })
-      .lean();
 
     const profile = serializeProfileUser(dbUser);
 

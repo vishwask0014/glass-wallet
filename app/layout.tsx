@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Header from "./Components/Header/Header";
 import ToasterProvider from "./Components/common/ToasterProvider";
+import MainContent from "./Components/common/MainContent";
 
 const themeScript = `
 (() => {
@@ -59,7 +60,7 @@ export default function RootLayout({
 
           <div className="relative z-10 flex min-h-screen flex-col">
             <Header />
-            <main className="flex-1 pb-10">{children}</main>
+            <MainContent>{children}</MainContent>
             <ToasterProvider />
           </div>
         </div>
