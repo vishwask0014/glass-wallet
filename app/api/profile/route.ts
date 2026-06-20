@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 import { NextRequest, NextResponse } from "next/server";
 import type { Document } from "mongoose";
 
-type DbUser = Document & {
+export type DbUser = Document & {
   _id: { toString(): string };
   name: string;
   email: string;
