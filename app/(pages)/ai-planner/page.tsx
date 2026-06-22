@@ -10,9 +10,9 @@ export default function AIplanner() {
       <HeroContentAiPlanner />
 
       {/* 20 : 60 : 20 layout */}
-      <section className="grid min-h-0 flex-1 gap-4  chatwrapper lg:gap-5">
+      <section className="grid min-h-0 flex-1 gap-4 chatwrapper lg:gap-5">
         {/* ───────────────────────── LEFT — Chat history (20%) ───────────────────────── */}
-        <HistoryAside />
+        {/* <HistoryAside /> */}
 
         {/* ───────────────────────── CENTER — Chat with AI (60%) ───────────────────────── */}
         <MainChat />

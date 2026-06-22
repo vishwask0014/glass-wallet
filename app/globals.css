@@ -631,7 +631,7 @@ html[data-theme="light"] .glass-toolbar {
 
 .chatwrapper {
   display: grid;
-  grid-template-columns: 20% 60% 20%;
+  grid-template-columns: 70% 30%;
   gap: 30px;
   max-height: calc(100vh - 60px);
   min-height: calc(100vh - 60px);

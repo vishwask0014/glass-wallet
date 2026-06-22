@@ -42,6 +42,16 @@ const UserSchema = new Schema(
       type: String,
       default: "",
     },
+
+    aiAnalysis: {
+      type: Schema.Types.Mixed,
+      default: null,
+    },
+
+    aiAnalysisUpdatedAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
