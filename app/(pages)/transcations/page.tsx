@@ -14,9 +14,8 @@ export default function Page() {
   const [isLoading, setIsLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [debitNcreditFilter, setDebitNcreditFilter] = useState("");
-  const [editTransaction, setEditTransaction] = useState<TransactionRecord | null>(
-    null,
-  );
+  const [editTransaction, setEditTransaction] =
+    useState<TransactionRecord | null>(null);
 
   async function getTransactions() {
     try {
@@ -72,6 +71,26 @@ export default function Page() {
     const twentyFourHours = 24 * 60 * 60 * 1000;
     return currentData - txnDate > twentyFourHours;
   }
+
+  const handleRemove = async (id: string) => {
+    try {
+      const res = await fetch(`/api/transaction/remove`, {
+        method: "DELETE",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          transactionId: id,
+        }),
+      });
+
+      if (res.ok) {
+        await getTransactions();
+      }
+    } catch (error) {
+      console.error("not able to remove transaction", error);
+    }
+  };
 
   return (
     <div className="page-shell py-6 sm:py-10">
@@ -245,6 +264,10 @@ export default function Page() {
                         </span>
                       </button>
                     )}
+
+                    <button onClick={() => handleRemove(row._id)}>
+                      Remove
+                    </button>
                   </div>
                 </div>
               </article>

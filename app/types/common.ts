@@ -22,6 +22,10 @@ export interface TransactionRecord extends TransactionPayload {
   _id: string;
 }
 
+export interface DeleteTransactionPayload {
+  transactionId: string;
+}
+
 export interface UserProfile {
   userName: string;
   email: string;

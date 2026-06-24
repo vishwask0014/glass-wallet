@@ -53,7 +53,7 @@ export default function FinanceAnalysis({ data }: { data: FinanceAnalysis }) {
           legend: { display: false },
           tooltip: {
             callbacks: {
-              label: (ctx) => ` ₹${ctx.parsed.x.toLocaleString("en-IN")}`,
+              label: (ctx) => ` ₹${ctx?.parsed?.x.toLocaleString("en-IN") || 0}`,
             },
           },
         },

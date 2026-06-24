@@ -24,7 +24,7 @@ Auth
 
 
 <!-- PHASE 1 — Authentication System -->
-### PHASE 1 — Authentication System 
+### PHASE 1 — Authentication System  DONE
  1. Password Hashing
  -- signup hashed password ✅
  -- login bcrypt password compare and login (progress)
@@ -46,3 +46,9 @@ Auth
 
 <!-- do this for later on for error from bcrypt -->
 <!-- npm install -D @types/bcrypt -->
+
+
+
+<!-- phase 4 -->
+
+AI integration to better understand user habits and help to improve
