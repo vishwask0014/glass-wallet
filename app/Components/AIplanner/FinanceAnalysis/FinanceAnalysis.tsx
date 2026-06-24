@@ -26,6 +26,13 @@ export default function FinanceAnalysis({ data }: { data: FinanceAnalysis }) {
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<Chart | null>(null);
 
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }).format(value);
+
   const totalSpent = data.topSpendingCategories.reduce((s, c) => s + c.amount, 0);
 
   useEffect(() => {
@@ -53,7 +60,7 @@ export default function FinanceAnalysis({ data }: { data: FinanceAnalysis }) {
           legend: { display: false },
           tooltip: {
             callbacks: {
-              label: (ctx) => ` ₹${ctx?.parsed?.x.toLocaleString("en-IN") || 0}`,
+              label: (ctx) => formatCurrency(Number(ctx.parsed?.x ?? ctx.raw ?? 0)),
             },
           },
         },
@@ -79,7 +86,6 @@ export default function FinanceAnalysis({ data }: { data: FinanceAnalysis }) {
 
   return (
     <div className="space-y-6 font-sans">
-      {/* Header + Summary */}
       <div>
         <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">
           GlassWallet AI · Spending Report
@@ -90,7 +96,6 @@ export default function FinanceAnalysis({ data }: { data: FinanceAnalysis }) {
         <p className="mt-2 text-sm text-gray-500 leading-relaxed">{data.summary}</p>
       </div>
 
-      {/* Metric Cards */}
       <div className="grid grid-cols-3 gap-2.5">
         {[
           { label: "Total spent", value: `₹${totalSpent.toLocaleString("en-IN")}`, sub: `${data.topSpendingCategories.length + 1}+ categories` },
@@ -105,7 +110,6 @@ export default function FinanceAnalysis({ data }: { data: FinanceAnalysis }) {
         ))}
       </div>
 
-      {/* Savings Banner */}
       <div className="flex items-center justify-between bg-emerald-50 dark:bg-emerald-950 rounded-xl px-5 py-4">
         <div>
           <p className="text-[11px] uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1">
@@ -118,11 +122,9 @@ export default function FinanceAnalysis({ data }: { data: FinanceAnalysis }) {
         <span className="text-3xl">🪙</span>
       </div>
 
-      {/* Chart */}
       <div>
         <p className="text-xs uppercase tracking-wider text-gray-400 mb-3">Spending by category</p>
         <div className="border border-gray-100 dark:border-gray-800 rounded-xl p-4">
-          {/* Legend */}
           <div className="flex flex-wrap gap-3 mb-4">
             {data.topSpendingCategories.map((c, i) => (
               <span key={c.category} className="flex items-center gap-1.5 text-xs text-gray-500">
@@ -140,7 +142,6 @@ export default function FinanceAnalysis({ data }: { data: FinanceAnalysis }) {
         </div>
       </div>
 
-      {/* Insights */}
       <div>
         <p className="text-xs uppercase tracking-wider text-gray-400 mb-3">What the data shows</p>
         <div className="space-y-2.5">
@@ -156,7 +157,6 @@ export default function FinanceAnalysis({ data }: { data: FinanceAnalysis }) {
         </div>
       </div>
 
-      {/* Suggestions */}
       <div>
         <p className="text-xs uppercase tracking-wider text-gray-400 mb-3">
           Suggestions — highest impact first
@@ -176,7 +176,6 @@ export default function FinanceAnalysis({ data }: { data: FinanceAnalysis }) {
         </div>
       </div>
 
-      {/* Weekly Plan */}
       <div>
         <p className="text-xs uppercase tracking-wider text-gray-400 mb-3">Weekly spending plan</p>
         <div className="border border-gray-100 dark:border-gray-800 rounded-xl px-5 py-4">
